@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Danbooru Artist Library</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f3f4f6;
+    --panel: #ffffff;
+    --panel2: #f8f9fb;
+    --text: #20242b;
+    --muted: #7b818c;
+    --border: #e2e5e9;
+    --accent: #5965d8;
+    --accent2: #4854c8;
+    --accent-soft: rgba(89, 101, 216, .10);
+    --danger: #d95757;
+    --warn: #c77d19;
+    --warn-soft: rgba(199, 125, 25, .10);
+    --radius: 16px;
+    --shadow: 0 10px 35px rgba(30, 35, 45, .07);
+}
+
+body.dark {
+    --bg: #14161a;
+    --panel: #1d2025;
+    --panel2: #25282e;
+    --text: #eceef2;
+    --muted: #949aa5;
+    --border: #30343b;
+    --accent: #7883ed;
+    --accent2: #8b95f5;
+    --accent-soft: rgba(120, 131, 237, .15);
+    --warn: #e5a94c;
+    --warn-soft: rgba(229, 169, 76, .14);
+    --shadow: 0 15px 45px rgba(0, 0, 0, .28);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    transition: background .2s, color .2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* ==================================================
+   HEADER
+================================================== */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, .88);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+}
+
+body.dark .header {
+    background: rgba(20, 22, 26, .88);
+}
+
+.header-inner {
+    width: min(1450px, calc(100% - 40px));
+    min-height: 68px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.logo-icon {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: var(--text);
+    color: var(--bg);
+    font-weight: 900;
+    font-size: 16px;
+}
+
+.logo-title {
+    font-size: 15px;
+    font-weight: 850;
+    letter-spacing: .5px;
+    white-space: nowrap;
+}
+
+.logo-sub {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 2px;
+    letter-spacing: .8px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+/* ==================================================
+   BUTTONS & INPUTS
+================================================== */
+button, input, textarea, select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.btn {
+    min-height: 38px;
+    padding: 0 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--panel2);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: .15s;
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background: var(--accent2);
+    border-color: var(--accent2);
+}
+
+.btn-danger {
+    color: var(--danger);
+}
+
+.btn-danger:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.btn-small {
+    min-height: 33px;
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+/* ==================================================
+   MAIN & HERO
+================================================== */
+.container {
+    width: min(1450px, calc(100% - 40px));
+    margin: auto;
+    padding: 28px 0 70px;
+}
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.hero h1 {
+    font-size: 28px;
+    letter-spacing: -.6px;
+}
+
+.hero p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 7px;
+    line-height: 1.6;
+}
+
+.stats {
+    display: flex;
+    gap: 26px;
+}
+
+.stat {
+    text-align: right;
+}
+
+.stat-number {
+    font-size: 22px;
+    font-weight: 850;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 3px;
+    letter-spacing: .6px;
+}
+
+/* ==================================================
+   TOOLBAR
+================================================== */
+.toolbar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 14px;
+    margin-bottom: 20px;
+}
+
+.toolbar-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.toolbar-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.search {
+    flex: 1;
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.search input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--panel2);
+    color: var(--text);
+    padding: 0 14px 0 38px;
+    font-size: 13px;
+}
+
+.search input:focus {
+    border-color: var(--accent);
+}
+
+.filters {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.filter {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: var(--muted);
+    font-size: 12px;
+    transition: .15s;
+}
+
+.filter:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.filter.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+/* ==================================================
+   ENV / STATUS BANNER
+================================================== */
+.status {
+    display: none;
+    margin-bottom: 18px;
+    padding: 12px 15px;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    background: var(--panel);
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.status.show {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.status.warn {
+    background: var(--warn-soft);
+    border-color: rgba(199, 125, 25, .28);
+    color: var(--text);
+}
+
+/* ==================================================
+   GRID & CARDS
+================================================== */
+.artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 18px;
+    align-items: start;
+}
+
+.artist-card {
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform .18s, box-shadow .18s;
+}
+
+.artist-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 42px rgba(30, 35, 45, .12);
+}
+
+.artist-header {
+    padding: 15px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.artist-info {
+    min-width: 0;
+}
+
+.artist-name {
+    font-size: 16px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.artist-tag {
+    margin-top: 4px;
+    color: var(--accent);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-badges {
+    display: flex;
+    gap: 5px;
+    flex: none;
+    align-items: center;
+}
+
+.category {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--panel2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.mode-badge {
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ==================================================
+   POST GRID & FALLBACK
+================================================== */
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+}
+
+.post-grid.single {
+    grid-template-columns: 1fr;
+}
+
+.post-grid.double {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.post {
+    display: block;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--panel2);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.post-grid.single .post {
+    aspect-ratio: 16 / 10;
+}
+
+.post img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .25s, opacity .2s;
+}
+
+.post:hover img {
+    transform: scale(1.04);
+    opacity: .9;
+}
+
+.post-loading,
+.post-error {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.post-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, .62);
+    color: #fff;
+    font-size: 9px;
+    backdrop-filter: blur(4px);
+}
+
+.post-fallback-box {
+    padding: 22px 16px;
+    background: var(--panel2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+}
+
+.post-fallback-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+}
+
+.post-fallback-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.post-fallback-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fallback-notice {
+    padding: 7px 14px;
+    background: var(--warn-soft);
+    color: var(--warn);
+    font-size: 11px;
+    border-top: 1px solid var(--border);
+}
+
+/* ==================================================
+   CARD FOOTER
+================================================== */
+.artist-body {
+    padding: 13px 15px 15px;
+}
+
+.note {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.65;
+    min-height: 20px;
+    word-break: break-word;
+    white-space: pre-wrap;
+}
+
+.card-actions {
+    display: flex;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.card-actions .btn {
+    flex: 1;
+}
+
+/* ==================================================
+   EMPTY STATE
+================================================== */
+.empty {
+    grid-column: 1 / -1;
+    padding: 70px 20px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: 15px;
+    color: var(--muted);
+    background: var(--panel);
+}
+
+.empty-icon {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.empty-title {
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.empty-text {
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* ==================================================
+   MODAL
+================================================== */
+.modal-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, .58);
+    backdrop-filter: blur(6px);
+}
+
+.modal-mask.show {
+    display: flex;
+}
+
+.modal {
+    width: min(600px, 100%);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    box-shadow: 0 30px 100px rgba(0, 0, 0, .35);
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: none;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 850;
+}
+
+.close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--panel2);
+    color: var(--muted);
+    font-size: 20px;
+    display: grid;
+    place-items: center;
+}
+
+.modal-body {
+    padding: 18px 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex: none;
+}
+
+.field {
+    margin-bottom: 16px;
+}
+
+.field:last-child {
+    margin-bottom: 0;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.field input[type="text"],
+.field input[type="url"],
+.field input:not([type]),
+.field textarea,
+.field select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--panel2);
+    color: var(--text);
+    font-size: 13px;
+}
+
+.field textarea {
+    min-height: 76px;
+    resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+    border-color: var(--accent);
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-row input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--accent);
+    flex: none;
+}
+
+.checkbox-row span {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.help {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.55;
+    margin-top: 5px;
+}
+
+.category-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.chip {
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ==================================================
+   MANUAL WORKS EDITOR
+================================================== */
+.works-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.work-row {
+    display: grid;
+    grid-template-columns: 54px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel2);
+}
+
+.work-thumb {
+    width: 54px;
+    height: 54px;
+    border-radius: 7px;
+    overflow: hidden;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.work-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.work-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.work-inputs input {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+    background: var(--panel) !important;
+}
+
+/* ==================================================
+   LIGHTBOX (大图预览)
+================================================== */
+.lightbox-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(10, 12, 16, .88);
+    backdrop-filter: blur(8px);
+}
+
+.lightbox-mask.show {
+    display: flex;
+}
+
+.lightbox-img {
+    max-width: min(92vw, 1000px);
+    max-height: 75vh;
+    border-radius: 12px;
+    object-fit: contain;
+    background: #000;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+}
+
+.lightbox-bar {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* ==================================================
+   TOAST
+================================================== */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translate(-50%, 16px);
+    z-index: 200;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: .2s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+    max-width: 90vw;
+    text-align: center;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+/* ==================================================
+   MOBILE
+================================================== */
+@media (max-width: 700px) {
+    .header-inner {
+        width: calc(100% - 24px);
+    }
+
+    .header-actions .text {
+        display: none;
+    }
+
+    .container {
+        width: calc(100% - 24px);
+        padding-top: 20px;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .hero h1 {
+        font-size: 24px;
+    }
+
+    .stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .stat {
+        text-align: left;
+    }
+
+    .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .toolbar-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .artist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .work-row {
+        grid-template-columns: 46px 1fr auto;
+        gap: 8px;
+    }
+
+    .work-thumb {
+        width: 46px;
+        height: 46px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="header-inner">
+        <div class="logo">
+            <div class="logo-icon">D</div>
+            <div>
+                <div class="logo-title">DANBOORU LIBRARY</div>
+                <div class="logo-sub">MY ARTIST COLLECTION</div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <button class="btn btn-small" onclick="openSettingsModal()" title="API 与代理设置">
+                ⚙ <span class="text">设置</span>
+            </button>
+            <button class="btn btn-small" onclick="toggleTheme()" title="切换深浅色主题">
+                ◐ <span class="text">主题</span>
+            </button>
+            <button class="btn btn-small" onclick="exportData()" title="导出 JSON 备份">
+                ↓ <span class="text">导出</span>
+            </button>
+            <button class="btn btn-primary btn-small" onclick="openAddModal()">
+                ＋ <span class="text">添加画师</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <div>
+            <h1>我的画师收藏</h1>
+            <p>支持手动指定代表图与 Danbooru API 自动拉图双模式，数据自动保存在当前浏览器。</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="artistCount">0</div>
+                <div class="stat-label">ARTISTS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="postCount">0</div>
+                <div class="stat-label">WORKS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="categoryCount">0</div>
+                <div class="stat-label">CATEGORIES</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="toolbar">
+        <div class="toolbar-row">
+            <div class="search">
+                <span class="search-icon">⌕</span>
+                <input id="searchInput" type="text" placeholder="搜索画师名称、Tag、分类、备注..." oninput="renderArtists()">
+            </div>
+
+            <div class="toolbar-btns">
+                <button class="btn btn-small" onclick="refreshAllPosts()">↻ 刷新自动图</button>
+                <button class="btn btn-small" onclick="document.getElementById('importFile').click()">↑ 导入 JSON</button>
+            </div>
+
+            <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importData(event)">
+        </div>
+
+        <div class="filters" id="filters"></div>
+    </section>
+
+    <div class="status" id="envNotice"></div>
+
+    <section class="artist-grid" id="artistGrid"></section>
+</main>
+
+<!-- =====================================================
+     添加 / 编辑画师 MODAL
+====================================================== -->
+<div class="modal-mask" id="artistModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle">添加画师</div>
+            <button class="close" onclick="closeModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="field">
+                <label>画师名称 *</label>
+                <input id="artistName" type="text" placeholder="例如：John Kafka">
+            </div>
+
+            <div class="field">
+                <label>Danbooru Artist Tag *</label>
+                <input id="artistTag" type="text" placeholder="例如：john_kafka 或 nnk_(nongnong)">
+                <div class="help">直接填画师 Tag（不要加 artist: 前缀），也可以直接粘贴 Danbooru 画师搜索网址，保存时会自动提取。</div>
+            </div>
+
+            <div class="field">
+                <label>分类</label>
+                <input id="artistCategory" type="text" placeholder="输入或点选下方分类">
+                <div class="category-chips" id="categoryChips"></div>
+            </div>
+
+            <div class="field">
+                <label>作品预览模式</label>
+                <select id="artistMode" onchange="toggleWorksSection()">
+                    <option value="manual">手动指定代表图（稳定 · 不依赖 API）</option>
+                    <option value="auto">自动从 API 获取（需配置代理，失败时用手动图兜底）</option>
+                    <option value="none">不显示预览图（简洁卡片）</option>
+                </select>
+                <div class="help" id="modeHelp"></div>
+            </div>
+
+            <div class="field" id="worksField">
+                <label>代表作品图片（支持多张）</label>
+                <div class="help">在 Danbooru 长按图片选择「复制图片地址」（以 .jpg / .png / .webp 结尾的 cdn.donmai.us 链接）粘贴到第一行；第二行原帖链接选填（填了点击跳原帖，不填点击放大看图）。</div>
+                <div class="works-list" id="worksList"></div>
+                <button type="button" class="btn btn-small" style="margin-top:10px;width:100%" onclick="addWorkRow()">＋ 添加一张代表图</button>
+            </div>
+
+            <div class="field">
+                <label>备注</label>
+                <textarea id="artistNote" placeholder="例如：喜欢他的线稿、配色、构图、人物塑造……"></textarea>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveArtist()">保存画师</button>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     设置 MODAL（代理与 API 参数）
+====================================================== -->
+<div class="modal-mask" id="settingsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">设置与代理配置</div>
+            <button class="close" onclick="closeSettingsModal()">×</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="field">
+                <label>当前运行环境</label>
+                <div id="envDetail" class="help" style="margin-top:0;padding:10px 12px;border-radius:9px;background:var(--panel2);border:1px solid var(--border);color:var(--text);"></div>
+            </div>
+
+            <div class="field">
+                <label>Cloudflare Worker 代理地址（选填）</label>
+                <input id="settingProxyUrl" type="url" placeholder="例如：https://danbooru-proxy.你的名字.workers.dev/?url=">
+                <div class="help">填入你的 Worker 代理前缀（末尾带 <code>/?url=</code>，或包含 <code>{url}</code> 占位符）。填好后即可在「自动获取」模式下直接拉取 Danbooru 作品。</div>
+            </div>
+
+            <div class="field">
+                <label>图片代理转发</label>
+                <label class="checkbox-row">
+                    <input id="settingProxyImages" type="checkbox">
+                    <span>Danbooru 图片也通过上面的代理加载</span>
+                </label>
+                <div class="help">如果你的网络无法直连 <code>cdn.donmai.us</code> 导致图片裂开，勾选此项可让图片一并走 Worker 代理加载（仅对 Danbooru / Safebooru 图片生效）。</div>
+            </div>
+
+            <div class="field">
+                <label>自动获取时的评级过滤</label>
+                <select id="settingRating">
+                    <option value="general">仅全年龄（rating:g）</option>
+                    <option value="no_explicit">排除 R18（-rating:e）</option>
+                    <option value="all">不限制评级（全部公开作品）</option>
+                </select>
+                <div class="help">Danbooru 匿名 API 最多支持 2 个 Tag 条件，以上选项均已适配该限制。</div>
+            </div>
+
+            <div class="field">
+                <label>自动获取每个画师显示数量</label>
+                <select id="settingLimit">
+                    <option value="3">3 张</option>
+                    <option value="6">6 张</option>
+                    <option value="9">9 张</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn" onclick="closeSettingsModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     大图预览 LIGHTBOX
+====================================================== -->
+<div class="lightbox-mask" id="lightbox" onclick="closeLightbox(event)">
+    <img id="lightboxImg" class="lightbox-img" alt="" referrerpolicy="no-referrer">
+    <div class="lightbox-bar">
+        <a id="lightboxOpenOrigin" class="btn btn-small" target="_blank" rel="noopener noreferrer">打开原图</a>
+        <a id="lightboxOpenArtist" class="btn btn-primary btn-small" target="_blank" rel="noopener noreferrer">去 Danbooru 看更多</a>
+        <button class="btn btn-small" onclick="closeLightbox()">关闭</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   常量与配置
+========================================================== */
+const STORAGE_KEY = "danbooru_artist_library_v2";
+const SETTINGS_KEY = "danbooru_library_settings_v1";
+const THEME_KEY = "danbooru_theme";
+const API_BASE = "https://danbooru.donmai.us/posts.json";
+const PRESET_CATEGORIES = ["未分类", "特别喜欢", "画风", "参考", "待研究", "其他"];
+
+const PROXYABLE_HOSTS = new Set([
+    "danbooru.donmai.us",
+    "cdn.donmai.us",
+    "safebooru.donmai.us"
+]);
+
+const IS_LOCAL_NULL_ORIGIN =
+    window.location.protocol === "file:" ||
+    window.location.protocol === "content:" ||
+    window.location.origin === "null";
+
+/* ==========================================================
+   状态
+========================================================== */
+let artists = [];
+let editingId = null;
+let currentCategory = "全部";
+let settings = {
+    proxyUrl: "",
+    proxyImages: false,
+    ratingFilter: "general",
+    postsPerArtist: 6
+};
+
+/*
+ * postCache[artistId] = {
+ *   status: "ok" | "error",
+ *   posts: [...],
+ *   errorMsg: "..."
+ * }
+ */
+let postCache = {};
+let toastTimer = null;
+
+/* ==========================================================
+   安全存储封装
+========================================================== */
+function safeStorageGet(key) {
+    try {
+        return localStorage.getItem(key);
+    } catch (_) {
+        return null;
+    }
+}
+
+function safeStorageSet(key, value) {
+    try {
+        localStorage.setItem(key, value);
+        return true;
+    } catch (_) {
+        showToast("当前浏览器限制了本地存储，请及时导出 JSON 备份");
+        return false;
+    }
+}
+
+/* ==========================================================
+   初始化
+========================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+    loadTheme();
+    loadSettings();
+    loadData();
+    renderCategoryChips();
+    renderEnvNotice();
+    renderAll();
+
+    document.getElementById("artistModal").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closeModal();
+    });
+    document.getElementById("settingsModal").addEventListener("click", (e) => {
+        if (e.target === e.currentTarget) closeSettingsModal();
+    });
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeLightbox();
+            closeModal();
+            closeSettingsModal();
+        }
+    });
+});
+
+function loadSettings() {
+    const raw = safeStorageGet(SETTINGS_KEY);
+    if (!raw) return;
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+            settings = {
+                proxyUrl: String(parsed.proxyUrl || ""),
+                proxyImages: Boolean(parsed.proxyImages),
+                ratingFilter: parsed.ratingFilter || "general",
+                postsPerArtist: Number(parsed.postsPerArtist) || 6
+            };
+        }
+    } catch (_) {}
+}
+
+function loadData() {
+    const raw = safeStorageGet(STORAGE_KEY);
+    if (!raw) {
+        artists = [];
+        return;
+    }
+    try {
+        const parsed = JSON.parse(raw);
+        const list = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.artists) ? parsed.artists : []);
+        artists = list.map(normalizeArtistRecord);
+    } catch (_) {
+        artists = [];
+    }
+}
+
+function saveData() {
+    safeStorageSet(STORAGE_KEY, JSON.stringify(artists));
+}
+
+function normalizeArtistRecord(item) {
+    let mode = item.mode;
+    if (!["manual", "auto", "none"].includes(mode)) {
+        if (Array.isArray(item.works) && item.works.length > 0) {
+            mode = "manual";
+        } else if (item.fetch === false) {
+            mode = "none";
+        } else {
+            mode = settings.proxyUrl ? "auto" : "manual";
+        }
+    }
+
+    const works = Array.isArray(item.works)
+        ? item.works
+            .filter(w => w && typeof w.imageUrl === "string" && w.imageUrl.trim())
+            .map(w => ({
+                imageUrl: w.imageUrl.trim(),
+                postUrl: String(w.postUrl || "").trim()
+            }))
+        : [];
+
+    return {
+        id: item.id || createId(),
+        name: String(item.name || "未命名画师").trim(),
+        tag: normalizeTag(item.tag || ""),
+        category: String(item.category || "未分类").trim() || "未分类",
+        note: String(item.note || "").trim(),
+        mode,
+        works,
+        createdAt: item.createdAt || Date.now()
+    };
+}
+
+/* ==========================================================
+   工具函数与代理拼装
+========================================================== */
+function createId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function normalizeTag(raw) {
+    let t = String(raw || "").trim();
+    if (!t) return "";
+    if (/^https?:\/\//i.test(t)) {
+        try {
+            const url = new URL(t);
+            const tagsParam = url.searchParams.get("tags");
+            if (tagsParam) {
+                t = tagsParam.trim().split(/\s+/)[0];
+            }
+        } catch (_) {}
+    }
+    t = t.replace(/^artist:/i, "").trim();
+    t = t.replace(/\s+/g, "_");
+    return t;
+}
+
+function artistUrl(tag) {
+    return "https://danbooru.donmai.us/posts?tags=" + encodeURIComponent(tag);
+}
+
+function postUrl(id) {
+    return "https://danbooru.donmai.us/posts/" + encodeURIComponent(id);
+}
+
+function applyProxy(targetUrl) {
+    const proxy = (settings.proxyUrl || "").trim();
+    if (!proxy) return targetUrl;
+    if (proxy.includes("{url}")) {
+        return proxy.replace("{url}", encodeURIComponent(targetUrl));
+    }
+    return proxy + encodeURIComponent(targetUrl);
+}
+
+function resolveImageUrl(rawUrl) {
+    const src = String(rawUrl || "").trim();
+    if (!src) return "";
+    if (!settings.proxyUrl || !settings.proxyImages) return src;
+    try {
+        const u = new URL(src);
+        if (PROXYABLE_HOSTS.has(u.hostname)) {
+            return applyProxy(src);
+        }
+    } catch (_) {}
+    return src;
+}
+
+function buildApiUrl(tag) {
+    const params = new URLSearchParams();
+    let queryTags = tag;
+    if (settings.ratingFilter === "general") {
+        queryTags = tag + " rating:g";
+    } else if (settings.ratingFilter === "no_explicit") {
+        queryTags = tag + " -rating:e";
+    }
+    params.set("tags", queryTags);
+    params.set("limit", String(settings.postsPerArtist || 6));
+
+    const target = API_BASE + "?" + params.toString();
+    return applyProxy(target);
+}
+
+function renderEnvNotice() {
+    const box = document.getElementById("envNotice");
+    const hasAutoArtists = artists.some(a => a.mode === "auto");
+
+    if (!settings.proxyUrl && hasAutoArtists) {
+        box.className = "status warn show";
+        box.innerHTML = "";
+
+        const text = document.createElement("span");
+        text.textContent = IS_LOCAL_NULL_ORIGIN
+            ? "当前为本地文件打开且未配置代理，Danbooru API 会被浏览器跨域拦截。建议在右上角「设置」中填入 Cloudflare Worker 代理，或改用手动代表图。"
+            : "当前尚未配置代理地址，如果「自动获取」卡片拉图失败，请在右上角「设置」中填入 Cloudflare Worker 代理地址。";
+
+        const btn = document.createElement("button");
+        btn.className = "btn btn-small";
+        btn.textContent = "去配置代理";
+        btn.onclick = openSettingsModal;
+
+        box.appendChild(text);
+        box.appendChild(btn);
+    } else {
+        box.className = "status";
+        box.innerHTML = "";
+    }
+}
+
+/* ==========================================================
+   API 拉取（带失败缓存，防止搜索时刷屏报错）
+========================================================== */
+async function fetchArtistPosts(artist) {
+    if (postCache[artist.id]) {
+        return postCache[artist.id];
+    }
+
+    const url = buildApiUrl(artist.tag);
+
+    try {
+        const res = await fetch(url, {
+            method: "GET",
+            headers: { "Accept": "application/json" },
+            mode: "cors"
+        });
+
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+
+        const data = await res.json();
+        const posts = Array.isArray(data)
+            ? data.filter(p => p && p.id && (p.preview_file_url || p.large_file_url || p.file_url))
+            : [];
+
+        postCache[artist.id] = {
+            status: "ok",
+            posts,
+            errorMsg: ""
+        };
+        return postCache[artist.id];
+    } catch (err) {
+        console.warn("Danbooru API 请求失败：", artist.name, err);
+        const msg = !settings.proxyUrl
+            ? "未配置代理，请求被跨域拦截或无法连接"
+            : "代理请求失败（请检查 Worker 地址与网络）";
+
+        postCache[artist.id] = {
+            status: "error",
+            posts: [],
+            errorMsg: msg
+        };
+        return postCache[artist.id];
+    }
+}
+
+function getApiImageUrl(post) {
+    return post.preview_file_url || post.large_file_url || post.file_url || "";
+}
+
+/* ==========================================================
+   画师弹窗逻辑
+========================================================== */
+function renderCategoryChips() {
+    const wrap = document.getElementById("categoryChips");
+    wrap.innerHTML = "";
+    const all = Array.from(new Set([...PRESET_CATEGORIES, ...getCategories()]));
+    all.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip";
+        btn.textContent = cat;
+        btn.onclick = () => {
+            document.getElementById("artistCategory").value = cat;
+        };
+        wrap.appendChild(btn);
+    });
+}
+
+function toggleWorksSection() {
+    const mode = document.getElementById("artistMode").value;
+    const worksField = document.getElementById("worksField");
+    const help = document.getElementById("modeHelp");
+
+    if (mode === "none") {
+        worksField.style.display = "none";
+        help.textContent = "卡片仅展示画师名称、Tag、备注和直达链接，最简洁。";
+    } else if (mode === "manual") {
+        worksField.style.display = "block";
+        help.textContent = "直接加载你填写的图片直链，不调用 Danbooru API，加载最稳。";
+    } else {
+        worksField.style.display = "block";
+        help.textContent = "通过 API 自动拉取该画师最新作品；若拉取失败，会自动改用下方填写的「手动代表图」兜底。";
+    }
+}
+
+function addWorkRow(imageUrl = "", postUrlVal = "") {
+    const list = document.getElementById("worksList");
+    const row = document.createElement("div");
+    row.className = "work-row";
+
+    const thumb = document.createElement("div");
+    thumb.className = "work-thumb";
+
+    const updateThumb = (src) => {
+        thumb.innerHTML = "";
+        const clean = src.trim();
+        if (!clean) {
+            thumb.textContent = "预览";
+            return;
+        }
+        const img = document.createElement("img");
+        img.src = resolveImageUrl(clean);
+        img.referrerPolicy = "no-referrer";
+        img.onerror = () => {
+            thumb.textContent = "无效";
+        };
+        thumb.appendChild(img);
+    };
+
+    const inputs = document.createElement("div");
+    inputs.className = "work-inputs";
+
+    const imgInput = document.createElement("input");
+    imgInput.type = "url";
+    imgInput.className = "work-img-url";
+    imgInput.placeholder = "图片直链（必填，如 https://cdn.donmai.us/...jpg）";
+    imgInput.value = imageUrl;
+    imgInput.addEventListener("input", () => updateThumb(imgInput.value));
+
+    const postInput = document.createElement("input");
+    postInput.type = "url";
+    postInput.className = "work-post-url";
+    postInput.placeholder = "Danbooru 原帖地址（选填，如 https://danbooru.donmai.us/posts/12345）";
+    postInput.value = postUrlVal;
+
+    inputs.appendChild(imgInput);
+    inputs.appendChild(postInput);
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn btn-small btn-danger";
+    delBtn.textContent = "删";
+    delBtn.onclick = () => row.remove();
+
+    row.appendChild(thumb);
+    row.appendChild(inputs);
+    row.appendChild(delBtn);
+
+    list.appendChild(row);
+    updateThumb(imageUrl);
+}
+
+function openAddModal() {
+    editingId = null;
+    document.getElementById("modalTitle").textContent = "添加画师";
+    document.getElementById("artistName").value = "";
+    document.getElementById("artistTag").value = "";
+    document.getElementById("artistCategory").value = "未分类";
+    document.getElementById("artistNote").value = "";
+    document.getElementById("artistMode").value = settings.proxyUrl ? "auto" : "manual";
+
+    const list = document.getElementById("worksList");
+    list.innerHTML = "";
+    addWorkRow();
+
+    renderCategoryChips();
+    toggleWorksSection();
+
+    document.getElementById("artistModal").classList.add("show");
+    document.body.classList.add("modal-open");
+}
+
+function editArtist(id, focusAddWork = false) {
+    const artist = artists.find(a => a.id === id);
+    if (!artist) return;
+
+    editingId = id;
+    document.getElementById("modalTitle").textContent = "编辑画师";
+    document.getElementById("artistName").value = artist.name || "";
+    document.getElementById("artistTag").value = artist.tag || "";
+    document.getElementById("artistCategory").value = artist.category || "未分类";
+    document.getElementById("artistNote").value = artist.note || "";
+    document.getElementById("artistMode").value = focusAddWork ? "manual" : (artist.mode || "manual");
+
+    const list = document.getElementById("worksList");
+    list.innerHTML = "";
+    if (artist.works && artist.works.length > 0) {
+        artist.works.forEach(w => addWorkRow(w.imageUrl, w.postUrl));
+    } else {
+        addWorkRow();
+    }
+
+    renderCategoryChips();
+    toggleWorksSection();
+
+    document.getElementById("artistModal").classList.add("show");
+    document.body.classList.add("modal-open");
+}
+
+function closeModal() {
+    document.getElementById("artistModal").classList.remove("show");
+    document.body.classList.remove("modal-open");
+    editingId = null;
+}
+
+function saveArtist() {
+    const name = document.getElementById("artistName").value.trim();
+    const tag = normalizeTag(document.getElementById("artistTag").value);
+    const category = document.getElementById("artistCategory").value.trim() || "未分类";
+    const note = document.getElementById("artistNote").value.trim();
+    const mode = document.getElementById("artistMode").value;
+
+    if (!name) {
+        showToast("请填写画师名称");
+        return;
+    }
+    if (!tag) {
+        showToast("请填写 Danbooru Artist Tag");
+        return;
+    }
+
+    const works = [];
+    document.querySelectorAll("#worksList .work-row").forEach(row => {
+        const imgUrl = row.querySelector(".work-img-url").value.trim();
+        const pUrl = row.querySelector(".work-post-url").value.trim();
+        if (imgUrl) {
+            works.push({ imageUrl: imgUrl, postUrl: pUrl });
+        }
+    });
+
+    if (editingId) {
+        const artist = artists.find(a => a.id === editingId);
+        if (artist) {
+            artist.name = name;
+            artist.tag = tag;
+            artist.category = category;
+            artist.note = note;
+            artist.mode = mode;
+            artist.works = works;
+        }
+        delete postCache[editingId];
+        showToast("画师已更新");
+    } else {
+        artists.unshift({
+            id: createId(),
+            name,
+            tag,
+            category,
+            note,
+            mode,
+            works,
+            createdAt: Date.now()
+        });
+        showToast("画师已添加");
+    }
+
+    saveData();
+    closeModal();
+    renderEnvNotice();
+    renderAll();
+}
+
+function deleteArtist(id) {
+    const artist = artists.find(a => a.id === id);
+    if (!artist) return;
+
+    if (!confirm(`确定删除「${artist.name}」吗？`)) return;
+
+    artists = artists.filter(a => a.id !== id);
+    delete postCache[id];
+
+    if (currentCategory !== "全部" && !getCategories().includes(currentCategory)) {
+        currentCategory = "全部";
+    }
+
+    saveData();
+    renderEnvNotice();
+    renderAll();
+    showToast("画师已删除");
+}
+
+/* ==========================================================
+   设置弹窗
+========================================================== */
+function openSettingsModal() {
+    const envDetail = document.getElementById("envDetail");
+    if (IS_LOCAL_NULL_ORIGIN) {
+        envDetail.textContent = `本地文件模式（${window.location.protocol} / origin: null）。建议部署到 GitHub Pages 或 Cloudflare Pages 防止手机本地数据丢失，并在下方填入 Worker 代理地址。`;
+    } else {
+        envDetail.textContent = `在线网页模式（${window.location.origin}）。数据已安全绑定到当前域名。`;
+    }
+
+    document.getElementById("settingProxyUrl").value = settings.proxyUrl || "";
+    document.getElementById("settingProxyImages").checked = Boolean(settings.proxyImages);
+    document.getElementById("settingRating").value = settings.ratingFilter || "general";
+    document.getElementById("settingLimit").value = String(settings.postsPerArtist || 6);
+
+    document.getElementById("settingsModal").classList.add("show");
+    document.body.classList.add("modal-open");
+}
+
+function closeSettingsModal() {
+    document.getElementById("settingsModal").classList.remove("show");
+    document.body.classList.remove("modal-open");
+}
+
+function saveSettings() {
+    let proxyVal = document.getElementById("settingProxyUrl").value.trim();
+    // 如果用户只粘贴了 workers.dev 域名忘了加 /?url=，自动补齐
+    if (proxyVal && !proxyVal.includes("?") && !proxyVal.includes("{url}")) {
+        proxyVal = proxyVal.replace(/\/+$/, "") + "/?url=";
+    }
+
+    settings.proxyUrl = proxyVal;
+    settings.proxyImages = document.getElementById("settingProxyImages").checked;
+    settings.ratingFilter = document.getElementById("settingRating").value;
+    settings.postsPerArtist = Number(document.getElementById("settingLimit").value) || 6;
+
+    safeStorageSet(SETTINGS_KEY, JSON.stringify(settings));
+    postCache = {};
+    closeSettingsModal();
+    renderEnvNotice();
+    renderAll();
+    showToast("设置已保存");
+}
+
+/* ==========================================================
+   分类与过滤
+========================================================== */
+function getCategories() {
+    const set = new Set();
+    artists.forEach(a => {
+        if (a.category) set.add(a.category);
+    });
+    return [...set];
+}
+
+function renderFilters() {
+    const container = document.getElementById("filters");
+    container.innerHTML = "";
+    const categories = ["全部", ...getCategories()];
+
+    if (!categories.includes(currentCategory)) {
+        currentCategory = "全部";
+    }
+
+    categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "filter" + (currentCategory === cat ? " active" : "");
+        btn.textContent = cat;
+        btn.onclick = () => {
+            currentCategory = cat;
+            renderAll();
+        };
+        container.appendChild(btn);
+    });
+}
+
+function getFilteredArtists() {
+    const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+    return artists.filter(artist => {
+        const catMatch = currentCategory === "全部" || artist.category === currentCategory;
+        if (!catMatch) return false;
+        if (!keyword) return true;
+        const text = [artist.name, artist.tag, artist.note, artist.category].join(" ").toLowerCase();
+        return text.includes(keyword);
+    });
+}
+
+/* ==========================================================
+   主渲染逻辑
+========================================================== */
+function renderAll() {
+    renderFilters();
+    renderArtists();
+    renderStats();
+}
+
+function renderArtists() {
+    const grid = document.getElementById("artistGrid");
+    const list = getFilteredArtists();
+    grid.innerHTML = "";
+
+    if (!list.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.innerHTML = `
+            <div class="empty-icon">◇</div>
+            <div class="empty-title">${artists.length ? "没有匹配的画师" : "还没有收藏画师"}</div>
+            <div class="empty-text">${artists.length ? "换个关键词或分类试试看。" : "点击右上角「＋ 添加画师」开始建立你的画师库。"}</div>
+        `;
+        grid.appendChild(empty);
+        return;
+    }
+
+    list.forEach(artist => {
+        grid.appendChild(createArtistCard(artist));
+    });
+}
+
+function createArtistCard(artist) {
+    const card = document.createElement("article");
+    card.className = "artist-card";
+
+    // Header
+    const header = document.createElement("div");
+    header.className = "artist-header";
+
+    const info = document.createElement("div");
+    info.className = "artist-info";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "artist-name";
+    nameEl.textContent = artist.name;
+
+    const tagEl = document.createElement("div");
+    tagEl.className = "artist-tag";
+    tagEl.textContent = artist.tag;
+
+    info.appendChild(nameEl);
+    info.appendChild(tagEl);
+
+    const badges = document.createElement("div");
+    badges.className = "header-badges";
+
+    if (artist.mode === "auto") {
+        const modeBadge = document.createElement("span");
+        modeBadge.className = "mode-badge";
+        modeBadge.textContent = "API";
+        badges.appendChild(modeBadge);
+    }
+
+    const catEl = document.createElement("span");
+    catEl.className = "category";
+    catEl.textContent = artist.category || "未分类";
+    badges.appendChild(catEl);
+
+    header.appendChild(info);
+    header.appendChild(badges);
+    card.appendChild(header);
+
+    // Media Slot
+    const mediaSlot = document.createElement("div");
+    card.appendChild(mediaSlot);
+
+    if (artist.mode === "manual") {
+        renderManualWorksInto(mediaSlot, artist);
+    } else if (artist.mode === "auto") {
+        renderAutoPostsInto(mediaSlot, artist);
+    }
+
+    // Body
+    const body = document.createElement("div");
+    body.className = "artist-body";
+
+    const noteEl = document.createElement("div");
+    noteEl.className = "note";
+    noteEl.textContent = artist.note || "暂无备注";
+    body.appendChild(noteEl);
+
+    const row1 = document.createElement("div");
+    row1.className = "card-actions";
+
+    const openLink = document.createElement("a");
+    openLink.className = "btn btn-primary btn-small";
+    openLink.href = artistUrl(artist.tag);
+    openLink.target = "_blank";
+    openLink.rel = "noopener noreferrer";
+    openLink.textContent = "打开 Danbooru";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "btn btn-small";
+    copyBtn.textContent = "复制 Tag";
+    copyBtn.addEventListener("click", () => copyTag(artist.tag));
+
+    row1.appendChild(openLink);
+    row1.appendChild(copyBtn);
+
+    const row2 = document.createElement("div");
+    row2.className = "card-actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-small";
+    editBtn.textContent = "编辑";
+    editBtn.addEventListener("click", () => editArtist(artist.id));
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn btn-small btn-danger";
+    delBtn.textContent = "删除";
+    delBtn.addEventListener("click", () => deleteArtist(artist.id));
+
+    row2.appendChild(editBtn);
+    row2.appendChild(delBtn);
+
+    body.appendChild(row1);
+    body.appendChild(row2);
+    card.appendChild(body);
+
+    return card;
+}
+
+/* ==========================================================
+   手动代表图渲染
+========================================================== */
+function renderManualWorksInto(container, artist) {
+    container.innerHTML = "";
+    const works = artist.works || [];
+
+    if (!works.length) {
+        const box = document.createElement("div");
+        box.className = "post-fallback-box";
+        box.innerHTML = `
+            <div class="post-fallback-title">尚未添加代表图</div>
+            <div class="post-fallback-desc">在 Danbooru 长按图片复制「图片地址」贴进来即可展示。</div>
+        `;
+        const actions = document.createElement("div");
+        actions.className = "post-fallback-actions";
+
+        const addBtn = document.createElement("button");
+        addBtn.className = "btn btn-small btn-primary";
+        addBtn.textContent = "＋ 添加代表图";
+        addBtn.onclick = () => editArtist(artist.id, true);
+
+        actions.appendChild(addBtn);
+        box.appendChild(actions);
+        container.appendChild(box);
+        return;
+    }
+
+    const grid = document.createElement("div");
+    grid.className = "post-grid" + (works.length === 1 ? " single" : (works.length === 2 ? " double" : ""));
+
+    works.forEach(work => {
+        grid.appendChild(createImageTile({
+            imageUrl: work.imageUrl,
+            href: work.postUrl || "",
+            artistTag: artist.tag,
+            badgeText: work.postUrl ? "原帖" : ""
+        }));
+    });
+
+    container.appendChild(grid);
+}
+
+/* ==========================================================
+   自动 API 作品渲染（带手动图兜底）
+========================================================== */
+async function renderAutoPostsInto(container, artist) {
+    container.innerHTML = `
+        <div class="post-grid">
+            <div class="post"><div class="post-loading">读取中…</div></div>
+            <div class="post"><div class="post-loading">读取中…</div></div>
+            <div class="post"><div class="post-loading">读取中…</div></div>
+        </div>
+    `;
+
+    const result = await fetchArtistPosts(artist);
+    if (!container.isConnected) return;
+
+    container.innerHTML = "";
+
+    if (result.status === "ok" && result.posts.length > 0) {
+        const posts = result.posts.slice(0, settings.postsPerArtist || 6);
+        const grid = document.createElement("div");
+        grid.className = "post-grid" + (posts.length === 1 ? " single" : (posts.length === 2 ? " double" : ""));
+
+        posts.forEach(post => {
+            grid.appendChild(createImageTile({
+                imageUrl: getApiImageUrl(post),
+                href: postUrl(post.id),
+                artistTag: artist.tag,
+                badgeText: post.rating ? String(post.rating).toUpperCase() : ""
+            }));
+        });
+        container.appendChild(grid);
+        renderStats();
+        return;
+    }
+
+    // 失败时优先使用手动代表图兜底
+    if (artist.works && artist.works.length > 0) {
+        const notice = document.createElement("div");
+        notice.className = "fallback-notice";
+        notice.textContent = result.status === "error"
+            ? `${result.errorMsg}，已显示手动代表图`
+            : "API 暂无符合评级的作品，已显示手动代表图";
+        container.appendChild(notice);
+
+        const wrap = document.createElement("div");
+        renderManualWorksInto(wrap, artist);
+        container.appendChild(wrap);
+        renderStats();
+        return;
+    }
+
+    // 降级卡片
+    const box = document.createElement("div");
+    box.className = "post-fallback-box";
+
+    const title = document.createElement("div");
+    title.className = "post-fallback-title";
+    title.textContent = result.status === "error" ? "无法自动获取作品" : "未找到公开作品";
+
+    const desc = document.createElement("div");
+    desc.className = "post-fallback-desc";
+    desc.textContent = result.status === "error"
+        ? `${result.errorMsg}。可在「设置」里填写代理，或切换为手动添加代表图。`
+        : "可能该画师 Tag 有误，或当前评级过滤条件排除了所有作品。";
+
+    const actions = document.createElement("div");
+    actions.className = "post-fallback-actions";
+
+    const switchBtn = document.createElement("button");
+    switchBtn.className = "btn btn-small";
+    switchBtn.textContent = "改用手动加图";
+    switchBtn.onclick = () => editArtist(artist.id, true);
+
+    const openBtn = document.createElement("a");
+    openBtn.className = "btn btn-small btn-primary";
+    openBtn.href = artistUrl(artist.tag);
+    openBtn.target = "_blank";
+    openBtn.rel = "noopener noreferrer";
+    openBtn.textContent = "打开 Danbooru";
+
+    actions.appendChild(switchBtn);
+    actions.appendChild(openBtn);
+
+    box.appendChild(title);
+    box.appendChild(desc);
+    box.appendChild(actions);
+    container.appendChild(box);
+    renderStats();
+}
+
+function createImageTile({ imageUrl, href, artistTag, badgeText }) {
+    const wrapper = href ? document.createElement("a") : document.createElement("div");
+    wrapper.className = "post";
+
+    const displayUrl = resolveImageUrl(imageUrl);
+
+    if (href) {
+        wrapper.href = href;
+        wrapper.target = "_blank";
+        wrapper.rel = "noopener noreferrer";
+    } else {
+        wrapper.addEventListener("click", () => openLightbox(displayUrl, imageUrl, artistTag));
+    }
+
+    const loading = document.createElement("div");
+    loading.className = "post-loading";
+    loading.textContent = "加载中";
+    wrapper.appendChild(loading);
+
+    const img = document.createElement("img");
+    img.src = displayUrl;
+    img.alt = "";
+    img.loading = "lazy";
+    img.referrerPolicy = "no-referrer";
+
+    img.onload = () => loading.remove();
+    img.onerror = () => {
+        img.style.display = "none";
+        loading.className = "post-error";
+        loading.textContent = "图片加载失败";
+    };
+
+    wrapper.appendChild(img);
+
+    if (badgeText) {
+        const badge = document.createElement("div");
+        badge.className = "post-badge";
+        badge.textContent = badgeText;
+        wrapper.appendChild(badge);
+    }
+
+    return wrapper;
+}
+
+/* ==========================================================
+   大图 Lightbox
+========================================================== */
+function openLightbox(displayUrl, originUrl, artistTag) {
+    document.getElementById("lightboxImg").src = displayUrl;
+    document.getElementById("lightboxOpenOrigin").href = originUrl || displayUrl;
+    document.getElementById("lightboxOpenArtist").href = artistUrl(artistTag);
+    document.getElementById("lightbox").classList.add("show");
+    document.body.classList.add("modal-open");
+}
+
+function closeLightbox(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById("lightbox").classList.remove("show");
+    document.body.classList.remove("modal-open");
+}
+
+/* ==========================================================
+   刷新 & 统计
+========================================================== */
+function refreshAllPosts() {
+    postCache = {};
+    renderArtists();
+    renderStats();
+    showToast("已重新请求自动模式画师");
+}
+
+function renderStats() {
+    document.getElementById("artistCount").textContent = artists.length;
+    document.getElementById("categoryCount").textContent = getCategories().length;
+
+    let worksCount = 0;
+    artists.forEach(artist => {
+        if (artist.mode === "manual") {
+            worksCount += (artist.works || []).length;
+        } else if (artist.mode === "auto") {
+            const cached = postCache[artist.id];
+            if (cached && cached.status === "ok" && cached.posts.length > 0) {
+                worksCount += Math.min(cached.posts.length, settings.postsPerArtist || 6);
+            } else {
+                worksCount += (artist.works || []).length;
+            }
+        }
+    });
+
+    document.getElementById("postCount").textContent = worksCount;
+}
+
+/* ==========================================================
+   复制 Tag（兼容本地与 HTTPS 环境）
+========================================================== */
+async function copyTag(tag) {
+    if (navigator.clipboard && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(tag);
+            showToast("Tag 已复制：" + tag);
+            return;
+        } catch (_) {}
+    }
+
+    try {
+        const ta = document.createElement("textarea");
+        ta.value = tag;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand("copy");
+        ta.remove();
+        if (ok) {
+            showToast("Tag 已复制：" + tag);
+            return;
+        }
+    } catch (_) {}
+
+    showToast("复制失败，请手动复制");
+}
+
+/* ==========================================================
+   导入 / 导出 JSON
+========================================================== */
+function exportData() {
+    const payload = {
+        version: 3,
+        exportedAt: new Date().toISOString(),
+        artists
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "danbooru_artist_library.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    showToast("收藏数据已导出");
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const parsed = JSON.parse(e.target.result);
+            const rawList = Array.isArray(parsed)
+                ? parsed
+                : (Array.isArray(parsed?.artists) ? parsed.artists : null);
+
+            if (!rawList) throw new Error("invalid");
+
+            artists = rawList.map(normalizeArtistRecord);
+            postCache = {};
+            currentCategory = "全部";
+            saveData();
+            renderEnvNotice();
+            renderAll();
+            showToast(`已成功导入 ${artists.length} 位画师`);
+        } catch (_) {
+            alert("JSON 文件格式不正确，请选择导出的备份文件。");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
+}
+
+/* ==========================================================
+   主题 & Toast
+========================================================== */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+    safeStorageSet(
+        THEME_KEY,
+        document.body.classList.contains("dark") ? "dark" : "light"
+    );
+}
+
+function loadTheme() {
+    if (safeStorageGet(THEME_KEY) === "dark") {
+        document.body.classList.add("dark");
+    }
+}
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2000);
+}
+</script>
+</body>
+</html>
